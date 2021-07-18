@@ -57,12 +57,6 @@ class LibraryModel(QtCore.QAbstractTableModel):
             return self.data[index.row()][TABLE_ORDER[index.column()]]
         return None
 
-    def setData(self, index, value, role):
-        if role != QtCore.Qt.EditRole or not index.isValid() or index.column() != self.columnCount() - 1:
-            return False
-        # TODO: Needs implementing
-        return False
-
     def headerData(self, index, orientation, role):
         if role != QtCore.Qt.DisplayRole:
             return None

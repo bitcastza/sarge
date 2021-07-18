@@ -5,7 +5,7 @@ from threading import Thread
 from pathlib import Path
 from PyQt5 import QtWidgets, uic
 from .settings import SETTINGS
-from .library import LibraryModel, load_playlist
+from .library import LibraryModel, LoadPlaylistThread
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -21,10 +21,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.library_model = LibraryModel()
         self.library_view.setModel(self.library_model)
         path = Path(SETTINGS['music_directory']).expanduser()
-        self.library_loader = Thread(target=load_playlist,
-                                     args=(path, self.library_model,))
+        self.library_loader = LoadPlaylistThread(path, self.library_model)
+        self.library_loader.finished.connect(self.library_loaded)
+        self.statusBar().showMessage('Library loading...')
         self.library_loader.start()
-        self.statusBar().showMessage('Loading library...')
         self.show()
 
     def init_instants(self):
@@ -43,9 +43,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 current_column = current_column + 1
                 current_row = 0
 
+    def library_loaded(self):
+        self.statusBar().showMessage('Loaded library.')
+
     def closeEvent(self, event):
-        if self.library_loader.is_alive():
-            self.library_loader.terminate()
+        if self.library_loader.isRunning():
+            self.library_loader.quit()
         event.accept()
 
 

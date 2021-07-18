@@ -5,26 +5,39 @@ from PyQt5 import QtCore, QtWidgets
 
 TABLE_ORDER = [ 'title', 'artist', 'length' ]
 
-def load_playlist(directory, model):
-    rows = []
-    for root, dirs, files in os.walk(directory):
-        for name in files:
-            try:
-                metadata = mutagen.File(os.path.join(root, name))
-                if metadata == None:
+def get_key(metadata, key, default=None):
+    try:
+        return metadata[key][0]
+    except KeyError:
+        return default
+
+
+class LoadPlaylistThread(QtCore.QThread):
+    def __init__(self, directory, model, parent=None):
+        super().__init__(parent)
+        self.directory = directory
+        self.model = model
+
+    def run(self):
+        rows = []
+        for root, dirs, files in os.walk(self.directory):
+            for name in files:
+                try:
+                    metadata = mutagen.File(os.path.join(root, name), easy=True)
+                    if metadata == None:
+                        continue
+                    length = metadata.info.length
+                    item = {
+                        'title': get_key(metadata, 'title', name),
+                        'artist': get_key(metadata, 'artist'),
+                        'length': '{:0>2.0f}:{:0>2.0f}'.format(length//60, length%60),
+                        'filename': name,
+                        'file': os.path.join(root, name),
+                    }
+                    rows.append(item)
+                except mutagen.MutagenError:
                     continue
-                item = {
-                    'title': metadata.get('title'),
-                    'artist': metadata.get('artist'),
-                    'length': metadata.info.length,
-                    'filename': name,
-                    'file': os.path.join(root, name),
-                }
-                rows.append(item)
-            except mutagen.MutagenError:
-                continue
-    model.appendRows(rows)
-    #TODO: Emit loaded signal
+        self.model.appendRows(rows)
 
 
 class LibraryModel(QtCore.QAbstractTableModel):
@@ -96,5 +109,10 @@ class LibraryModel(QtCore.QAbstractTableModel):
 
 
 class LibraryView(QtWidgets.QTableView):
-    def __init__(self, parent=None):
-        QtWidgets.QTableView.__init__(self, parent)
+    column_ratio = [6, 4, 1]
+
+    def resizeEvent(self, event):
+        width = self.width()
+        total_size = sum(self.column_ratio)
+        for i in range(len(self.column_ratio)):
+            self.setColumnWidth(i, int(width * self.column_ratio[i] / total_size))

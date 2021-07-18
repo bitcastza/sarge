@@ -1,10 +1,36 @@
+import os
+import mutagen
+from threading import Thread
 from PyQt5 import QtCore, QtWidgets
 
+TABLE_ORDER = [ 'title', 'artist', 'length' ]
 
-class PlaylistModel(QtCore.QAbstractTableModel):
+def load_playlist(directory, model):
+    rows = []
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            try:
+                metadata = mutagen.File(os.path.join(root, name))
+                if metadata == None:
+                    continue
+                item = {
+                    'title': metadata.get('title'),
+                    'artist': metadata.get('artist'),
+                    'length': metadata.info.length,
+                    'filename': name,
+                    'file': os.path.join(root, name),
+                }
+                rows.append(item)
+            except mutagen.MutagenError:
+                continue
+    model.appendRows(rows)
+    #TODO: Emit loaded signal
+
+
+class LibraryModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.horizontal_header = ['Title', 'Artist', 'Duration']
+        self.horizontal_header = list(map(lambda n : n.title(), TABLE_ORDER))
         self.data = []
 
     def rowCount(self, parent=QtCore.QModelIndex()):
@@ -15,7 +41,7 @@ class PlaylistModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return self.data[index.row()][index.column()]
+            return self.data[index.row()][TABLE_ORDER[index.column()]]
         return None
 
     def setData(self, index, value, role):
@@ -34,6 +60,9 @@ class PlaylistModel(QtCore.QAbstractTableModel):
 
     def appendRow(self, row):
         self.insertRows(self.rowCount(),[row])
+
+    def appendRows(self, rows):
+        self.insertRows(self.rowCount(), rows)
 
     def insertRows(self, row, rows, parent = QtCore.QModelIndex()):
         self.beginInsertRows(parent, row, row + len(rows) - 1)
@@ -66,20 +95,6 @@ class PlaylistModel(QtCore.QAbstractTableModel):
         self.endMoveRows()
 
 
-class PlaylistView(QtWidgets.QTableView):
+class LibraryView(QtWidgets.QTableView):
     def __init__(self, parent=None):
         QtWidgets.QTableView.__init__(self, parent)
-        column_weighting = [1, 1, 0]
-        header = self.horizontalHeader()
-        total_weight = 0
-        for weight in column_weighting:
-            total_weight = total_weight + weight
-        total_size = 0
-        for i in range(len(column_weighting)):
-            total_size = total_size + header.sectionSize(i)
-        length = header.length()
-        for i in range(len(column_weighting)):
-            if column_weighting == 0:
-                continue
-            new_size = total_size * column_weighting[i] / total_weight
-            header.setDefaultSectionSize(i, new_size)

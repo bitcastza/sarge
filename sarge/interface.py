@@ -1,9 +1,11 @@
 import sys
 import sarge.resources
 from importlib.resources import files, as_file
+from threading import Thread
+from pathlib import Path
 from PyQt5 import QtWidgets, uic
 from .settings import SETTINGS
-from .playlist import PlaylistModel
+from .library import LibraryModel, load_playlist
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -16,8 +18,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_ui(self):
         self.init_instants()
-        self.library_model = PlaylistModel()
+        self.library_model = LibraryModel()
         self.library_view.setModel(self.library_model)
+        path = Path(SETTINGS['music_directory']).expanduser()
+        self.library_loader = Thread(target=load_playlist,
+                                     args=(path, self.library_model,))
+        self.library_loader.start()
+        self.statusBar().showMessage('Loading library...')
         self.show()
 
     def init_instants(self):
@@ -35,6 +42,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if current_row >= rows:
                 current_column = current_column + 1
                 current_row = 0
+
+    def closeEvent(self, event):
+        if self.library_loader.is_alive():
+            self.library_loader.terminate()
+        event.accept()
 
 
 class InstantItem(QtWidgets.QFrame):

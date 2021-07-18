@@ -79,7 +79,7 @@
         <number>0</number>
        </property>
        <item row="1" column="0">
-        <widget class="PlaylistView" name="library_view">
+        <widget class="LibraryView" name="library_view">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -175,9 +175,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlaylistView</class>
+   <class>LibraryView</class>
    <extends>QTableView</extends>
-   <header location="global">sarge.playlist</header>
+   <header location="global">sarge.library</header>
   </customwidget>
  </customwidgets>
  <resources/>

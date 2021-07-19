@@ -3,7 +3,7 @@ import sarge.resources
 from importlib.resources import files, as_file
 from threading import Thread
 from pathlib import Path
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, QtMultimedia, uic
 from .settings import SETTINGS
 from .library import LibraryModel, LoadPlaylistThread
 
@@ -11,10 +11,22 @@ from .library import LibraryModel, LoadPlaylistThread
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+        self.init_player()
         ui_file = files(sarge.resources).joinpath('main_window.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.init_ui()
+
+    def init_player(self):
+        player_format = QtMultimedia.QAudioFormat()
+        player_format.setSampleRate(SETTINGS['player']['sample_rate'])
+        player_format.setChannelCount(SETTINGS['player']['channels'])
+        player_format.setSampleSize(8)
+        player_format.setCodec("audio/pcm")
+        player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
+        player_format.setSampleType(QtMultimedia.QAudioFormat.UnSignedInt)
+        self.player = QtMultimedia.QAudioOutput(player_format, self)
+        self.player.start()
 
     def init_ui(self):
         self.init_instants()
@@ -49,6 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         if self.library_loader.isRunning():
             self.library_loader.quit()
+        self.player.stop()
         event.accept()
 
 

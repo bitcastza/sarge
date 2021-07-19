@@ -1,3 +1,18 @@
+###########################################################################
+# Sarge is Copyright (C) 2021 Kyle Robbertze <kyle@bitcast.co.za>
+#
+# Sarge is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, or
+# any later version as published by the Free Software Foundation.
+#
+# Sarge is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sarge. If not, see <http://www.gnu.org/licenses/>.
+###########################################################################
 import os
 import mutagen
 from threading import Thread
@@ -44,17 +59,19 @@ class LibraryModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.horizontal_header = list(map(lambda n : n.title(), TABLE_ORDER))
-        self.data = []
+        self._data = []
 
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.data)
+        return len(self._data)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         return len(self.horizontal_header)
 
     def data(self, index, role):
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            return self.data[index.row()][TABLE_ORDER[index.column()]]
+        if role == QtCore.Qt.DisplayRole:
+            return self._data[index.row()][TABLE_ORDER[index.column()]]
+        if role == QtCore.Qt.UserRole:
+            return self._data[index.row()]
         return None
 
     def headerData(self, index, orientation, role):
@@ -66,7 +83,7 @@ class LibraryModel(QtCore.QAbstractTableModel):
             return str(index + 1)
 
     def appendRow(self, row):
-        self.insertRows(self.rowCount(),[row])
+        self.insertRow(self.rowCount(),row)
 
     def appendRows(self, rows):
         self.insertRows(self.rowCount(), rows)
@@ -75,7 +92,7 @@ class LibraryModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(parent, row, row + len(rows) - 1)
         for i in range(len(rows)):
             row_i = row + i
-            self.data.insert(row_i, rows[i])
+            self._data.insert(row_i, rows[i])
         self.endInsertRows()
 
     def insertRow(self, row, row_data):
@@ -84,7 +101,7 @@ class LibraryModel(QtCore.QAbstractTableModel):
     def removeRows(self, row, count, parent=QtCore.QModelIndex()):
         self.beginRemoveRows(parent, row, row + count - 1)
         for i in range(count):
-            del self.data[row + count - 1]
+            del self._data[row + count - 1]
         self.endRemoveRows()
         return True
 
@@ -95,10 +112,10 @@ class LibraryModel(QtCore.QAbstractTableModel):
             destination_parent, destination):
         self.beginMoveRows(source_parent, source_first, source_last,
                            destination_parent, destination)
-        items = self.data[source_first:source_last + 1]
-        self.data = self.data[:source_first] + self.data[source_last + 1:]
+        items = self._data[source_first:source_last + 1]
+        self._data = self._data[:source_first] + self._data[source_last + 1:]
         for i in range(len(items)):
-            self.data.insert(destination + i, items[i])
+            self._data.insert(destination + i, items[i])
         self.endMoveRows()
 
 

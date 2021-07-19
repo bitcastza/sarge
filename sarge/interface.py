@@ -1,3 +1,18 @@
+###########################################################################
+# Sarge is Copyright (C) 2021 Kyle Robbertze <kyle@bitcast.co.za>
+#
+# Sarge is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, or
+# any later version as published by the Free Software Foundation.
+#
+# Sarge is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sarge. If not, see <http://www.gnu.org/licenses/>.
+###########################################################################
 import sys
 import sarge.resources
 from importlib.resources import files, as_file
@@ -6,6 +21,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtWidgets, QtMultimedia, uic
 from .settings import SETTINGS
 from .library import LibraryModel, LoadPlaylistThread
+from .playlist import PlaylistItemWidget, PlaylistModelItem
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -30,13 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_ui(self):
         self.init_instants()
-        self.library_model = LibraryModel()
-        self.library_view.setModel(self.library_model)
-        path = Path(SETTINGS['music_directory']).expanduser()
-        self.library_loader = LoadPlaylistThread(path, self.library_model)
-        self.library_loader.finished.connect(self.library_loaded)
-        self.statusBar().showMessage('Library loading...')
-        self.library_loader.start()
+        self.init_library()
         self.show()
 
     def init_instants(self):
@@ -47,13 +57,23 @@ class MainWindow(QtWidgets.QMainWindow):
         current_row = 0
         current_column = 0
         for i in range(num_instants):
-            instant = InstantItem()
+            instant = InstantItem(self)
             self.pallet_layout.addWidget(instant, current_row, current_column)
             self.instants.append(instant)
             current_row = current_row + 1
             if current_row >= rows:
                 current_column = current_column + 1
                 current_row = 0
+
+    def init_library(self):
+        self.library_model = LibraryModel(self)
+        self.library_view.setModel(self.library_model)
+        path = Path(SETTINGS['music_directory']).expanduser()
+        self.library_loader = LoadPlaylistThread(path, self.library_model)
+        self.library_loader.finished.connect(self.library_loaded)
+        self.statusBar().showMessage('Library loading...')
+        self.library_loader.start()
+        self.library_view.doubleClicked.connect(self.append_item_to_playlist)
 
     def library_loaded(self):
         self.statusBar().showMessage('Loaded library.')
@@ -64,10 +84,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.player.stop()
         event.accept()
 
+    def append_item_to_playlist(self, index):
+        row = self.playlist_view.count()
+        data = index.data(QtCore.Qt.UserRole)
+        item_model = PlaylistModelItem(data)
+        self.playlist_view.insertItem(row, item_model)
+        self.playlist_view.setItemWidget(item_model, PlaylistItemWidget(data))
+
 
 class InstantItem(QtWidgets.QFrame):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent)
         ui_file = files(sarge.resources).joinpath('instant_widget.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)

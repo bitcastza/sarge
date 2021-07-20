@@ -15,6 +15,7 @@
 ###########################################################################
 import os
 import mutagen
+from pathlib import Path
 
 def get_key(metadata, key, default=None):
     try:
@@ -23,13 +24,23 @@ def get_key(metadata, key, default=None):
         return default
 
 def get_metadata(filename):
-    metadata = mutagen.File(filename, easy=True)
+    path = Path(filename).expanduser()
+    metadata = mutagen.File(path, easy=True)
     if metadata == None:
         return None
     length = metadata.info.length
-    return {
-        'title': get_key(metadata, 'title', os.path.basename(filename)),
-        'artist': get_key(metadata, 'artist'),
-        'length': '{:0>2.0f}:{:0>2.0f}'.format(length//60, length%60),
-        'file': filename
-    }
+    title = get_key(metadata, 'title', path.name)
+    artist = get_key(metadata, 'artist')
+    length = '{:0>2.0f}:{:0>2.0f}'.format(length//60, length%60)
+    return Metadata(title, artist, length, path)
+
+
+class Metadata:
+    def __init__(self, title, artist, length, filename):
+        self.title = title
+        self.artist = artist
+        self.length = length
+        self.filename = filename
+
+    def title_artist(self):
+        return f'{self.title} - {self.artist}'

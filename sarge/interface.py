@@ -17,11 +17,11 @@ import sys
 import sarge.resources
 from importlib.resources import files, as_file
 from threading import Thread
-from pathlib import Path
 from PyQt5 import QtCore, QtWidgets, QtMultimedia, uic
 from .settings import SETTINGS
 from .library import LibraryModel, LoadPlaylistThread
 from .playlist import PlaylistItemWidget, PlaylistModelItem
+from .utils import get_metadata
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -56,8 +56,7 @@ class MainWindow(QtWidgets.QMainWindow):
         current_row = 0
         current_column = 0
         for f in instant_files:
-            path = Path(f).expanduser()
-            instant = InstantItem(f, self)
+            instant = InstantItem(get_metadata(f), self)
             self.pallet_layout.addWidget(instant, current_row, current_column)
             self.instants.append(instant)
             current_column = current_column + 1
@@ -68,8 +67,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def init_library(self):
         self.library_model = LibraryModel(self)
         self.library_view.setModel(self.library_model)
-        path = Path(SETTINGS['music_directory']).expanduser()
-        self.library_loader = LoadPlaylistThread(path, self.library_model)
+        self.library_loader = LoadPlaylistThread(SETTINGS['music_directory'],
+                                                 self.library_model)
         self.library_loader.finished.connect(self.library_loaded)
         self.statusBar().showMessage('Library loading...')
         self.library_loader.start()
@@ -93,12 +92,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class InstantItem(QtWidgets.QFrame):
-    def __init__(self, filepath, parent=None):
+    def __init__(self, item, parent=None):
         super().__init__(parent)
-        self.filepath = filepath
+        self.item = item
         ui_file = files(sarge.resources).joinpath('instant_widget.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
+        self.name_label.setText(self.item.title_artist())
+        self.duration_label.setText(self.item.length)
+        self.remainder_label.setText('')
         self.show()
 
 

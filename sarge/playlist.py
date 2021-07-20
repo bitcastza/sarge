@@ -37,6 +37,6 @@ class PlaylistItemWidget(QtWidgets.QWidget):
         ui_file = files(sarge.resources).joinpath('playlist_item.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
-        self.information_label.setText(f'{item["title"]} - {item["artist"]}')
-        self.duration_label.setText(item['length'])
+        self.information_label.setText(self.item.title_artist())
+        self.duration_label.setText(item.length)
         self.show()

@@ -36,7 +36,6 @@ class LoadPlaylistThread(QtCore.QThread):
                     item = get_metadata(os.path.join(root, name))
                     if item == None:
                         continue
-                    item['filename'] = name
                     rows.append(item)
                 except mutagen.MutagenError:
                     continue
@@ -57,7 +56,8 @@ class LibraryModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole:
-            return self._data[index.row()][TABLE_ORDER[index.column()]]
+            item = self._data[index.row()]
+            return getattr(item, TABLE_ORDER[index.column()])
         if role == QtCore.Qt.UserRole:
             return self._data[index.row()]
         return None

@@ -17,14 +17,9 @@ import os
 import mutagen
 from threading import Thread
 from PyQt5 import QtCore, QtWidgets
+from .utils import get_metadata
 
 TABLE_ORDER = [ 'title', 'artist', 'length' ]
-
-def get_key(metadata, key, default=None):
-    try:
-        return metadata[key][0]
-    except KeyError:
-        return default
 
 
 class LoadPlaylistThread(QtCore.QThread):
@@ -38,17 +33,10 @@ class LoadPlaylistThread(QtCore.QThread):
         for root, dirs, files in os.walk(self.directory):
             for name in files:
                 try:
-                    metadata = mutagen.File(os.path.join(root, name), easy=True)
-                    if metadata == None:
+                    item = get_metadata(os.path.join(root, name))
+                    if item == None:
                         continue
-                    length = metadata.info.length
-                    item = {
-                        'title': get_key(metadata, 'title', name),
-                        'artist': get_key(metadata, 'artist'),
-                        'length': '{:0>2.0f}:{:0>2.0f}'.format(length//60, length%60),
-                        'filename': name,
-                        'file': os.path.join(root, name),
-                    }
+                    item['filename'] = name
                     rows.append(item)
                 except mutagen.MutagenError:
                     continue

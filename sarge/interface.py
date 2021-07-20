@@ -51,19 +51,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_instants(self):
         self.instants = []
-        rows = SETTINGS['instants']['rows']
         columns = SETTINGS['instants']['columns']
-        num_instants = rows * columns
+        instant_files = SETTINGS['instants']['files']
         current_row = 0
         current_column = 0
-        for i in range(num_instants):
-            instant = InstantItem(self)
+        for f in instant_files:
+            path = Path(f).expanduser()
+            instant = InstantItem(f, self)
             self.pallet_layout.addWidget(instant, current_row, current_column)
             self.instants.append(instant)
-            current_row = current_row + 1
-            if current_row >= rows:
-                current_column = current_column + 1
-                current_row = 0
+            current_column = current_column + 1
+            if current_column >= columns:
+                current_row = current_row + 1
+                current_column = 0
 
     def init_library(self):
         self.library_model = LibraryModel(self)
@@ -93,8 +93,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class InstantItem(QtWidgets.QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, filepath, parent=None):
         super().__init__(parent)
+        self.filepath = filepath
         ui_file = files(sarge.resources).joinpath('instant_widget.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)

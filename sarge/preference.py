@@ -57,6 +57,7 @@ class Ui_Dialog(object):
         self.cancel_button.setObjectName("cancel_button")
         self.apply_button = QtWidgets.QPushButton(Dialog)
         self.apply_button.setGeometry(QtCore.QRect(410, 490, 75, 31))
+        self.apply_button.clicked.connect(self.save_changes)
         font = QtGui.QFont()
         font.setPointSize(11)
         self.apply_button.setFont(font)
@@ -134,6 +135,15 @@ class Ui_Dialog(object):
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(self.browse_button, "Open directory", self.directory_path.text())
+
+    def save_changes(self):
+        settings = Settings()
+        settings.sarge_columns = self.column_field.text()
+        settings.sarge_player_sample_rate = self.sample_rate_field.text()
+        settings.sarge_player_channel = self.channels_field.currentText()
+        settings.music_directory = self.directory_path.text()
+        # Still investigating how to set the settings.sarge_files because we need
+        # all the content of the list but I don't know how to get it
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate

@@ -15,18 +15,20 @@
 ###########################################################################
 import sys
 import sarge.resources
-from importlib.resources import files, as_file
-from threading import Thread
+from importlib_resources import files, as_file
 from PyQt5 import QtCore, QtWidgets, QtMultimedia, uic
-from .settings import SETTINGS
-from .library import LibraryModel, LoadPlaylistThread
-from .playlist import PlaylistItemWidget, PlaylistModelItem
-from .utils import get_metadata
+from settings import Settings
+from library import LibraryModel, LoadPlaylistThread
+from playlist import PlaylistItemWidget, PlaylistModelItem
+from utils import get_metadata
+from preference import PreferenceDialog
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+        self.settings = Settings()
+        self.dialog = PreferenceDialog()
         self.init_player()
         ui_file = files(sarge.resources).joinpath('main_window.ui')
         with as_file(ui_file) as ui:
@@ -35,13 +37,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_player(self):
         player_format = QtMultimedia.QAudioFormat()
-        player_format.setSampleRate(SETTINGS['player']['sample_rate'])
-        player_format.setChannelCount(SETTINGS['player']['channels'])
+        player_format.setSampleRate(int(self.settings.sarge_player_sample_rate))
+        player_format.setChannelCount(2)
         player_format.setSampleSize(8)
         player_format.setCodec("audio/pcm")
         player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
         player_format.setSampleType(QtMultimedia.QAudioFormat.UnSignedInt)
         self.player = QtMultimedia.QAudioOutput(player_format, self)
+        self.actionPrefence.triggered.connect(self.dialog)
+
         self.player.start()
 
     def init_ui(self):
@@ -51,8 +55,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_instants(self):
         self.instants = []
-        columns = SETTINGS['instants']['columns']
-        instant_files = SETTINGS['instants']['files']
+        columns = self.settings.sarge_columns
+        instant_files = self.settings.sarge_files
         current_row = 0
         current_column = 0
         for f in instant_files:
@@ -67,8 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def init_library(self):
         self.library_model = LibraryModel(self)
         self.library_view.setModel(self.library_model)
-        self.library_loader = LoadPlaylistThread(SETTINGS['music_directory'],
-                                                 self.library_model)
+        self.library_loader = LoadPlaylistThread(self.settings.music_directory, self.library_model)
         self.library_loader.finished.connect(self.library_loaded)
         self.statusBar().showMessage('Library loading...')
         self.library_loader.start()

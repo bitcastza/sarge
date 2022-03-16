@@ -21,18 +21,21 @@ class Settings:
 
         if not self.config.contains('files'):
             changed = True
-            self.config.setValue('files', ['~/music/jingles/Station ID III (2017).mp3',
-                                           '~/music/jingles/This is UCT Radio (Voice Only).mp3',
-                                           '~/music/jingles/Transition Effect.mp3',
-                                           '~/music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3'])
+            self.config.setValue('files', ['~/My Music/jingles/Station ID III (2017).mp3',
+                                           '~/My Music/jingles/This is UCT Radio (Voice Only).mp3',
+                                           '~/My Music/jingles/Transition Effect.mp3',
+                                           '~/My Music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3'])
 
         if not self.config.contains('music_directory'):
             changed = True
-            self.config.setValue('music_directory', '~/music/library')
+            self.config.setValue('music_directory', '~/music/2015-2016 music')
 
-        if not self.config.contains('player'):
+        if not self.config.contains('sample_rate'):
             changed = True
             self.config.setValue('sample_rate', 48000)
+
+        if not self.config.contains("channels"):
+            changed = True
             self.config.setValue("channels", "Mono")
 
         if changed:

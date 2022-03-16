@@ -14,7 +14,7 @@
 # along with Sarge. If not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 import sarge.resources
-from importlib.resources import files, as_file
+from importlib_resources import files, as_file
 from PyQt5 import QtCore, QtWidgets, uic
 
 
@@ -29,6 +29,7 @@ class PlaylistModelItem(QtWidgets.QListWidgetItem):
         if role == QtCore.Qt.SizeHintRole:
             return QtCore.QSize(400, 60)
         return super().data(role)
+
 
 class PlaylistItemWidget(QtWidgets.QWidget):
     def __init__(self, item, parent=None):

@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog
-from settings import Settings
+from .settings import Settings
 from importlib_resources import files, as_file
 import sarge.resources
 import os

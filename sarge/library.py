@@ -17,7 +17,7 @@ import os
 import mutagen
 from threading import Thread
 from PyQt5 import QtCore, QtWidgets
-from utils import get_metadata
+from .utils import get_metadata
 
 TABLE_ORDER = ['title', 'artist', 'length']
 

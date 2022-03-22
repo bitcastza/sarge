@@ -37,8 +37,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def init_player(self):
         player_format = QtMultimedia.QAudioFormat()
-        player_format.setSampleRate(int(self.settings.sarge_player_sample_rate))
-        player_format.setChannelCount(2)
+        player_format.setSampleRate(self.settings.sarge_player_sample_rate)
+        player_format.setChannelCount(self.settings.sarge_player_channel)
         player_format.setSampleSize(8)
         player_format.setCodec("audio/pcm")
         player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
@@ -56,7 +56,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_dialog(self):
         ui_interface = PreferenceDialog()
         settings = Settings()
-        combobox_index = ui_interface.channels_field.findText(settings.sarge_player_channel, Qt.MatchFixedString)
+        channel = {"Mono": 1, "Stereo": 2}
+        option = list(channel.keys())[list(channel.values()).index(settings.sarge_player_channel)]
+        combobox_index = ui_interface.channels_field.findText(option, Qt.MatchFixedString)
         ui_interface.channels_field.setCurrentIndex(combobox_index)
         ui_interface.cancel_button.clicked.connect(lambda: PreferenceDialog.close(ui_interface))
         ui_interface.show()

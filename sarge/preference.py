@@ -1,16 +1,17 @@
-import sys
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog
-from .settings import Settings
+from settings import Settings
 from importlib_resources import files, as_file
 import sarge.resources
 import os
 
 
-class CustomWidget(QtWidgets.QWidget):
+class CustomWidgetDeleteButton(QtWidgets.QWidget):
+    # This is the delete button that shows up next to each of the
+    # items in the ListView so we can delete them
     def __init__(self, parent=None):
-        super(CustomWidget, self).__init__(parent)
+        super(CustomWidgetDeleteButton, self).__init__(parent)
         self.button = QtWidgets.QPushButton("button")
         lay = QtWidgets.QHBoxLayout(self)
         lay.addWidget(self.button, alignment=Qt.AlignRight)
@@ -27,13 +28,15 @@ class PreferenceDialog(QtWidgets.QDialog):
         self.init_preference()
 
     def init_preference(self):
-        self.column_field.setText(self.settings.sarge_columns)
-        self.sample_rate_field.setText(self.settings.sarge_player_sample_rate)
+        self.column_field.setText(str(self.settings.sarge_columns))
+        self.sample_rate_field.setText(str(self.settings.sarge_player_sample_rate))
         self.model = QtGui.QStandardItemModel(self.files_list)
         self.select_files.clicked.connect(self.select_instant_files)
         self.directory_path.setText(self.settings.music_directory)
         self.browse_button.clicked.connect(self.select_directory)
         self.apply_button.clicked.connect(self.save_changes)
+        self.apply_button.clicked.connect(self.close)
+        # still checking on the part to reload UI
 
     def select_instant_files(self):
         all_files = []
@@ -46,7 +49,7 @@ class PreferenceDialog(QtWidgets.QDialog):
             for file in all_files:
                 item = QtGui.QStandardItem(file)
                 self.model.appendRow(item)
-                self.files_list.setIndexWidget(item.index(), CustomWidget())
+                self.files_list.setIndexWidget(item.index(), CustomWidgetDeleteButton())
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(self.browse_button, "Open directory", self.directory_path.text())
@@ -60,21 +63,12 @@ class PreferenceDialog(QtWidgets.QDialog):
                 model.removeRow(item.row())
 
     def save_changes(self):
+        channel_value = {"Mono": 1, "Stereo": 2}
         sarge_settings = Settings()
-        sarge_settings.sarge_columns = self.column_field.text()
-        sarge_settings.sarge_player_sample_rate = self.sample_rate_field.text()
-        sarge_settings.sarge_player_channel = self.channels_field.currentText()
+        sarge_settings.sarge_columns = int(self.column_field.text())
+        sarge_settings.sarge_player_sample_rate = int(self.sample_rate_field.text())
+        sarge_settings.sarge_player_channel = channel_value[self.channels_field.currentText()]
         sarge_settings.music_directory = self.directory_path.text()
+
         # Still investigating how to set the settings.sarge_files because we need
         # all the content of the list but I don't know how to get it
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    interface = PreferenceDialog()
-    settings = Settings()
-    combobox_index = interface.channels_field.findText(settings.sarge_player_channel, Qt.MatchFixedString)
-    interface.channels_field.setCurrentIndex(combobox_index)
-    interface.cancel_button.clicked.connect(lambda: PreferenceDialog.close(interface))
-    interface.show()
-    sys.exit(app.exec_())

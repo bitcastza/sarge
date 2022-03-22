@@ -21,10 +21,10 @@ class Settings:
 
         if not self.config.contains('files'):
             changed = True
-            self.config.setValue('files', ['~/My Music/jingles/Station ID III (2017).mp3',
-                                           '~/My Music/jingles/This is UCT Radio (Voice Only).mp3',
-                                           '~/My Music/jingles/Transition Effect.mp3',
-                                           '~/My Music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3'])
+            self.config.setValue('files', ['~/music/jingles/Station ID III (2017).mp3',
+                                           '~/music/jingles/This is UCT Radio (Voice Only).mp3',
+                                           '~/music/jingles/Transition Effect.mp3',
+                                           '~/music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3'])
 
         if not self.config.contains('music_directory'):
             changed = True
@@ -45,7 +45,7 @@ class Settings:
     @property
     def sarge_columns(self):
         """ returns number of columns """
-        return self.config.value('columns', type=str)
+        return self.config.value('columns', type=int)
 
     @sarge_columns.setter
     def sarge_columns(self, columns):
@@ -81,7 +81,7 @@ class Settings:
     @property
     def sarge_player_channel(self):
         """ Returns details on the play of the songs"""
-        channels = self.config.value("channels")
+        channels = self.config.value("channels", type=int)
         return channels
 
     @sarge_player_channel.setter
@@ -93,7 +93,7 @@ class Settings:
     @property
     def sarge_player_sample_rate(self):
         """ Returns details on the play of the songs"""
-        sample_rate = self.config.value("sample_rate")
+        sample_rate = self.config.value("sample_rate", type=int)
         return sample_rate
 
     @sarge_player_sample_rate.setter

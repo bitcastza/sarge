@@ -1,21 +1,9 @@
-from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QFileDialog
-from settings import Settings
+from .settings import Settings
 from importlib_resources import files, as_file
 import sarge.resources
 import os
-
-
-class CustomWidgetDeleteButton(QtWidgets.QWidget):
-    # This is the delete button that shows up next to each of the
-    # items in the ListView so we can delete them
-    def __init__(self, parent=None):
-        super(CustomWidgetDeleteButton, self).__init__(parent)
-        self.button = QtWidgets.QPushButton("button")
-        lay = QtWidgets.QHBoxLayout(self)
-        lay.addWidget(self.button, alignment=Qt.AlignRight)
-        lay.setContentsMargins(0, 0, 0, 0)
 
 
 class PreferenceDialog(QtWidgets.QDialog):
@@ -30,37 +18,38 @@ class PreferenceDialog(QtWidgets.QDialog):
     def init_preference(self):
         self.column_field.setText(str(self.settings.sarge_columns))
         self.sample_rate_field.setText(str(self.settings.sarge_player_sample_rate))
-        self.model = QtGui.QStandardItemModel(self.files_list)
+        self.files_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.select_files.clicked.connect(self.select_instant_files)
         self.directory_path.setText(self.settings.music_directory)
+        if len(self.settings.sarge_files) != 0:
+            for file in self.settings.sarge_files:
+                self.files_list.addItem(file)
+
         self.browse_button.clicked.connect(self.select_directory)
         self.apply_button.clicked.connect(self.save_changes)
-        self.apply_button.clicked.connect(self.close)
-        # still checking on the part to reload UI
+        self.delete_button.clicked.connect(self.delete_selected_items)
 
     def select_instant_files(self):
         all_files = []
-        filename = QFileDialog.getOpenFileName(self.select_files, "Open file")
+        filename = QFileDialog.getOpenFileName(self.pushButton, "Open file", "", "Audio "
+                                                                                 "files(*.au *.mid *.rmi *.mp3 *.mp4 "
+                                                                                 "*.ogg *.aif *.aiff *.m3u *.ra *.ram "
+                                                                                 "*.vorbis *.snd *.wav)")
 
         if os.path.basename(filename[0]) != "":
             all_files.append(os.path.basename(filename[0]))
-            self.files_list.setModel(self.model)
 
             for file in all_files:
-                item = QtGui.QStandardItem(file)
-                self.model.appendRow(item)
-                self.files_list.setIndexWidget(item.index(), CustomWidgetDeleteButton())
+                self.files_list.addItem(file)
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(self.browse_button, "Open directory", self.directory_path.text())
         self.directory_path.setText(directory)
 
-    def delete_item_from_list(self):
-        for index in self.files_list.selectedIndexes():
-            selected_item = self.files_list.model().itemFromIndex(index)
-            model = self.files_list.model()
-            for item in model.findItems(selected_item.text()):
-                model.removeRow(item.row())
+    def delete_selected_items(self):
+        items = self.files_list.selectedItems()
+        for item in items:
+            self.files_list.takeItem(self.listWidget.row(item))
 
     def save_changes(self):
         channel_value = {"Mono": 1, "Stereo": 2}
@@ -69,6 +58,4 @@ class PreferenceDialog(QtWidgets.QDialog):
         sarge_settings.sarge_player_sample_rate = int(self.sample_rate_field.text())
         sarge_settings.sarge_player_channel = channel_value[self.channels_field.currentText()]
         sarge_settings.music_directory = self.directory_path.text()
-
-        # Still investigating how to set the settings.sarge_files because we need
-        # all the content of the list but I don't know how to get it
+        sarge_settings.sarge_files = [self.files_list.item(i).text() for i in range(self.files_list.count())]

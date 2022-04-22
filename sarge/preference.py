@@ -44,12 +44,13 @@ class PreferenceDialog(QtWidgets.QDialog):
 
     def select_directory(self):
         directory = QFileDialog.getExistingDirectory(self.browse_button, "Open directory", self.directory_path.text())
-        self.directory_path.setText(directory)
+        if directory is not None:
+            self.directory_path.setText(directory)
 
     def delete_selected_items(self):
         items = self.files_list.selectedItems()
         for item in items:
-            self.files_list.takeItem(self.listWidget.row(item))
+            self.files_list.takeItem(self.files_list.row(item))
 
     def save_changes(self):
         channel_value = {"Mono": 1, "Stereo": 2}

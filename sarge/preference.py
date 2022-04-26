@@ -60,3 +60,4 @@ class PreferenceDialog(QtWidgets.QDialog):
         sarge_settings.sarge_player_channel = channel_value[self.channels_field.currentText()]
         sarge_settings.music_directory = self.directory_path.text()
         sarge_settings.sarge_files = [self.files_list.item(i).text() for i in range(self.files_list.count())]
+

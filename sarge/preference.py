@@ -31,10 +31,11 @@ class PreferenceDialog(QtWidgets.QDialog):
 
     def select_instant_files(self):
         all_files = []
-        filename = QFileDialog.getOpenFileName(self.pushButton, "Open file", "", "Audio "
-                                                                                 "files(*.au *.mid *.rmi *.mp3 *.mp4 "
-                                                                                 "*.ogg *.aif *.aiff *.m3u *.ra *.ram "
-                                                                                 "*.vorbis *.snd *.wav)")
+        filename = QFileDialog.getOpenFileName(self.select_files,
+                                               "Open file", "", "Audio "
+                                               "files(*.au *.mid *.rmi *.mp3 *.mp4 "
+                                               "*.ogg *.aif *.aiff *.m3u *.ra *.ram "
+                                               "*.vorbis *.snd *.wav)")
 
         if os.path.basename(filename[0]) != "":
             all_files.append(os.path.basename(filename[0]))
@@ -60,4 +61,3 @@ class PreferenceDialog(QtWidgets.QDialog):
         sarge_settings.sarge_player_channel = channel_value[self.channels_field.currentText()]
         sarge_settings.music_directory = self.directory_path.text()
         sarge_settings.sarge_files = [self.files_list.item(i).text() for i in range(self.files_list.count())]
-

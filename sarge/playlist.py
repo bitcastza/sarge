@@ -16,6 +16,7 @@
 import sarge.resources
 from importlib_resources import files, as_file
 from PyQt5 import QtCore, QtWidgets, uic
+from .playout_engine import PlayOutEngine
 
 
 class PlaylistModelItem(QtWidgets.QListWidgetItem):
@@ -35,9 +36,12 @@ class PlaylistItemWidget(QtWidgets.QWidget):
     def __init__(self, item, parent=None):
         super().__init__(parent)
         self.item = item
+        self.playout_engine = PlayOutEngine(self.item)
         ui_file = files(sarge.resources).joinpath('playlist_item.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.information_label.setText(self.item.title_artist())
         self.duration_label.setText(item.length)
+        self.player = PlayOutEngine(self.item)
+        self.play_button.clicked.connect(self.playout_engine.play_audio)
         self.show()

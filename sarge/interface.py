@@ -23,7 +23,6 @@ from .playlist import PlaylistItemWidget, PlaylistModelItem
 from .utils import get_metadata
 from .preference import PreferenceDialog
 from PyQt5.QtCore import Qt
-from .playout_engine import PlayOutEngine
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -34,14 +33,17 @@ class MainWindow(QtWidgets.QMainWindow):
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.init_ui()
-        # The label on the comment below will show current playing song
-        # print(self.now_playing_tack_label)
 
-    def position_changed(self, position):
-        self.curret_track_progress.setValue(position)
-
-    def duration_changed(self, duration):
-        self.curret_track_progress.setRange(0, duration)
+    def init_player(self):
+        player_format = QtMultimedia.QAudioFormat()
+        player_format.setSampleRate(self.settings.sarge_player_sample_rate)
+        player_format.setChannelCount(self.settings.sarge_player_channel)
+        player_format.setSampleSize(8)
+        player_format.setCodec("audio/pcm")
+        player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
+        player_format.setSampleType(QtMultimedia.QAudioFormat.UnSignedInt)
+        self.player = QtMultimedia.QAudioOutput(player_format, self)
+        self.player.start()
 
     def init_ui(self):
         self.init_instants()
@@ -90,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         if self.library_loader.isRunning():
             self.library_loader.quit()
-        # self.player.stop()
+        self.player.stop()
         event.accept()
 
     def append_item_to_playlist(self, index):
@@ -99,8 +101,6 @@ class MainWindow(QtWidgets.QMainWindow):
         item_model = PlaylistModelItem(data)
         self.playlist_view.insertItem(row, item_model)
         self.playlist_view.setItemWidget(item_model, PlaylistItemWidget(data))
-        self.playout_engine = PlayOutEngine(data)
-        # self.now_playing_tack_label.setText(PlaylistItemWidget(data).item.title)
 
 
 class InstantItem(QtWidgets.QFrame):

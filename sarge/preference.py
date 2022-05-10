@@ -38,7 +38,7 @@ class PreferenceDialog(QtWidgets.QDialog):
                                                "*.vorbis *.snd *.wav)")
 
         if os.path.basename(filename[0]) != "":
-            all_files.append(os.path.basename(filename[0]))
+            all_files.append(filename[0])
 
             for file in all_files:
                 self.files_list.addItem(file)

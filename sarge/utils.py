@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Sarge. If not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
-import os
+
 import mutagen
 from pathlib import Path
+
 
 def get_key(metadata, key, default=None):
     try:
@@ -23,15 +24,16 @@ def get_key(metadata, key, default=None):
     except KeyError:
         return default
 
+
 def get_metadata(filename):
     path = Path(filename).expanduser()
     metadata = mutagen.File(path, easy=True)
-    if metadata == None:
+    if metadata is None:
         return None
     length = metadata.info.length
     title = get_key(metadata, 'title', path.name)
     artist = get_key(metadata, 'artist')
-    length = '{:0>2.0f}:{:0>2.0f}'.format(length//60, length%60)
+    length = '{:0>2.0f}:{:0>2.0f}'.format(length//60, length % 60)
     return Metadata(title, artist, length, path)
 
 

@@ -19,7 +19,7 @@ from threading import Thread
 from PyQt5 import QtCore, QtWidgets
 from .utils import get_metadata
 
-TABLE_ORDER = [ 'title', 'artist', 'length' ]
+TABLE_ORDER = ['title', 'artist', 'length']
 
 
 class LoadPlaylistThread(QtCore.QThread):
@@ -34,7 +34,7 @@ class LoadPlaylistThread(QtCore.QThread):
             for name in files:
                 try:
                     item = get_metadata(os.path.join(root, name))
-                    if item == None:
+                    if item is None:
                         continue
                     rows.append(item)
                 except mutagen.MutagenError:
@@ -45,7 +45,7 @@ class LoadPlaylistThread(QtCore.QThread):
 class LibraryModel(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.horizontal_header = list(map(lambda n : n.title(), TABLE_ORDER))
+        self.horizontal_header = list(map(lambda n: n.title(), TABLE_ORDER))
         self._data = []
 
     def rowCount(self, parent=QtCore.QModelIndex()):
@@ -71,12 +71,12 @@ class LibraryModel(QtCore.QAbstractTableModel):
             return str(index + 1)
 
     def appendRow(self, row):
-        self.insertRow(self.rowCount(),row)
+        self.insertRow(self.rowCount(), row)
 
     def appendRows(self, rows):
         self.insertRows(self.rowCount(), rows)
 
-    def insertRows(self, row, rows, parent = QtCore.QModelIndex()):
+    def insertRows(self, row, rows, parent=QtCore.QModelIndex()):
         self.beginInsertRows(parent, row, row + len(rows) - 1)
         for i in range(len(rows)):
             row_i = row + i
@@ -97,7 +97,7 @@ class LibraryModel(QtCore.QAbstractTableModel):
         self.removeRows(row, 1)
 
     def moveRows(self, source_parent, source_first, source_last,
-            destination_parent, destination):
+                 destination_parent, destination):
         self.beginMoveRows(source_parent, source_first, source_last,
                            destination_parent, destination)
         items = self._data[source_first:source_last + 1]

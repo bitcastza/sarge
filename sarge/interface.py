@@ -44,6 +44,7 @@ class MainWindow(QtWidgets.QMainWindow):
         player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
         player_format.setSampleType(QtMultimedia.QAudioFormat.UnSignedInt)
         self.player = QtMultimedia.QAudioOutput(player_format, self)
+
         self.player.start()
 
     def init_ui(self):

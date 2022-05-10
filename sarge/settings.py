@@ -43,7 +43,7 @@ class Settings:
 
         if not self.config.contains('music_directory'):
             changed = True
-            self.config.setValue('music_directory', '~/music/2015-2016 music')
+            self.config.setValue('music_directory', '~/music/library')
 
         if not self.config.contains('sample_rate'):
             changed = True

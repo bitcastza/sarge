@@ -29,6 +29,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.settings = Settings()
+        self.init_player()
         ui_file = files(sarge.resources).joinpath('main_window.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)

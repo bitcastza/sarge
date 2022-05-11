@@ -1,3 +1,4 @@
 PyQt5
 mutagen>=1.25
 importlib_resources
+pydub==0.25.1

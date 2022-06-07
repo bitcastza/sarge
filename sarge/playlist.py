@@ -19,9 +19,10 @@ from PyQt5 import QtCore, QtWidgets, uic
 
 
 class PlaylistModelItem(QtWidgets.QListWidgetItem):
-    def __init__(self, item, parent=None, type=QtWidgets.QListWidgetItem.ItemType.UserType):
+    def __init__(self, item, playout_engine, parent=None, type=QtWidgets.QListWidgetItem.ItemType.UserType):
         super().__init__(parent, type)
         self.item = item
+        self.playout_engine = playout_engine
 
     def data(self, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.UserRole:
@@ -32,12 +33,17 @@ class PlaylistModelItem(QtWidgets.QListWidgetItem):
 
 
 class PlaylistItemWidget(QtWidgets.QWidget):
-    def __init__(self, item, parent=None):
+    def __init__(self, item, playout_engine, parent=None):
         super().__init__(parent)
         self.item = item
+        self.playout_engine = playout_engine
         ui_file = files(sarge.resources).joinpath('playlist_item.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.information_label.setText(self.item.title_artist())
         self.duration_label.setText(item.length)
+        self.play_button.clicked.connect(self.play_song_on_playlist)
         self.show()
+
+    def play_song_on_playlist(self):
+        self.playout_engine.play_audio(self.item.filename)

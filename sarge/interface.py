@@ -23,29 +23,21 @@ from .playlist import PlaylistItemWidget, PlaylistModelItem
 from .utils import get_metadata
 from .preference import PreferenceDialog
 from PyQt5.QtCore import Qt
+from .playout_engine import PlayOutEngine
+from PyQt5.QtMultimedia import QAudio
 
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.settings = Settings()
-        self.init_player()
         ui_file = files(sarge.resources).joinpath('main_window.ui')
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.init_ui()
-
-    def init_player(self):
-        player_format = QtMultimedia.QAudioFormat()
-        player_format.setSampleRate(self.settings.sarge_player_sample_rate)
-        player_format.setChannelCount(self.settings.sarge_player_channel)
-        player_format.setSampleSize(8)
-        player_format.setCodec("audio/pcm")
-        player_format.setByteOrder(QtMultimedia.QAudioFormat.LittleEndian)
-        player_format.setSampleType(QtMultimedia.QAudioFormat.UnSignedInt)
-        self.player = QtMultimedia.QAudioOutput(player_format, self)
-
-        self.player.start()
+        self.playout_engine = PlayOutEngine()
+        # if self.playout_engine.player.state() == QAudio.ActiveState:
+        # self.now_playing_tack_label.setText("")
 
     def init_ui(self):
         self.init_instants()
@@ -94,15 +86,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         if self.library_loader.isRunning():
             self.library_loader.quit()
-        self.player.stop()
+        self.playout_engine.stop_audio()
         event.accept()
 
     def append_item_to_playlist(self, index):
         row = self.playlist_view.count()
         data = index.data(QtCore.Qt.UserRole)
-        item_model = PlaylistModelItem(data)
+        item_model = PlaylistModelItem(data, self.playout_engine)
         self.playlist_view.insertItem(row, item_model)
-        self.playlist_view.setItemWidget(item_model, PlaylistItemWidget(data))
+        self.playlist_view.setItemWidget(item_model, PlaylistItemWidget(data, self.playout_engine))
 
 
 class InstantItem(QtWidgets.QFrame):

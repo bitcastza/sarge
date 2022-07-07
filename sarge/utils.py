@@ -31,9 +31,9 @@ def get_metadata(filename):
     if metadata is None:
         return None
     length = metadata.info.length
-    title = get_key(metadata, 'title', path.name)
-    artist = get_key(metadata, 'artist')
-    length = '{:0>2.0f}:{:0>2.0f}'.format(length//60, length % 60)
+    title = get_key(metadata, "title", path.name)
+    artist = get_key(metadata, "artist")
+    length = f"{length//60:0>2.0f}:{length % 60:0>2.0f}"
     return Metadata(title, artist, length, path)
 
 
@@ -45,4 +45,4 @@ class Metadata:
         self.filename = filename
 
     def title_artist(self):
-        return f'{self.title} - {self.artist}'
+        return f"{self.title} - {self.artist}"

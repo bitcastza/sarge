@@ -19,7 +19,7 @@ from threading import Thread
 from PyQt5 import QtCore, QtWidgets
 from .utils import get_metadata
 
-TABLE_ORDER = ['title', 'artist', 'length']
+TABLE_ORDER = ["title", "artist", "length"]
 
 
 class LoadPlaylistThread(QtCore.QThread):
@@ -96,12 +96,14 @@ class LibraryModel(QtCore.QAbstractTableModel):
     def removeRow(self, row):
         self.removeRows(row, 1)
 
-    def moveRows(self, source_parent, source_first, source_last,
-                 destination_parent, destination):
-        self.beginMoveRows(source_parent, source_first, source_last,
-                           destination_parent, destination)
-        items = self._data[source_first:source_last + 1]
-        self._data = self._data[:source_first] + self._data[source_last + 1:]
+    def moveRows(
+        self, source_parent, source_first, source_last, destination_parent, destination
+    ):
+        self.beginMoveRows(
+            source_parent, source_first, source_last, destination_parent, destination
+        )
+        items = self._data[source_first : source_last + 1]
+        self._data = self._data[:source_first] + self._data[source_last + 1 :]
         for i in range(len(items)):
             self._data.insert(destination + i, items[i])
         self.endMoveRows()

@@ -19,7 +19,9 @@ from PyQt5 import QtCore, QtWidgets, uic
 
 
 class PlaylistModelItem(QtWidgets.QListWidgetItem):
-    def __init__(self, item, parent=None, type=QtWidgets.QListWidgetItem.ItemType.UserType):
+    def __init__(
+        self, item, parent=None, type=QtWidgets.QListWidgetItem.ItemType.UserType
+    ):
         super().__init__(parent, type)
         self.item = item
 
@@ -35,7 +37,7 @@ class PlaylistItemWidget(QtWidgets.QWidget):
     def __init__(self, item, parent=None):
         super().__init__(parent)
         self.item = item
-        ui_file = files(sarge.resources).joinpath('playlist_item.ui')
+        ui_file = files(sarge.resources).joinpath("playlist_item.ui")
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.information_label.setText(self.item.title_artist())

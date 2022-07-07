@@ -26,28 +26,33 @@ class Settings:
     """
 
     def __init__(self):
-        self.organisation = 'Bitcast'
-        self.application = 'sarge'
+        self.organisation = "Bitcast"
+        self.application = "sarge"
         self.config = QSettings(self.organisation, self.application)
         changed = False
-        if not self.config.contains('columns'):
+        if not self.config.contains("columns"):
             changed = True
-            self.config.setValue('columns', 2)
+            self.config.setValue("columns", 2)
 
-        if not self.config.contains('files'):
+        if not self.config.contains("files"):
             changed = True
-            self.config.setValue('files', ['~/music/jingles/Station ID III (2017).mp3',
-                                           '~/music/jingles/This is UCT Radio (Voice Only).mp3',
-                                           '~/music/jingles/Transition Effect.mp3',
-                                           '~/music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3'])
+            self.config.setValue(
+                "files",
+                [
+                    "~/music/jingles/Station ID III (2017).mp3",
+                    "~/music/jingles/This is UCT Radio (Voice Only).mp3",
+                    "~/music/jingles/Transition Effect.mp3",
+                    "~/music/jingles/Turn It Up ( The Soundtrack to Your Campus life).mp3",
+                ],
+            )
 
-        if not self.config.contains('music_directory'):
+        if not self.config.contains("music_directory"):
             changed = True
-            self.config.setValue('music_directory', '~/music/library')
+            self.config.setValue("music_directory", "~/music/library")
 
-        if not self.config.contains('sample_rate'):
+        if not self.config.contains("sample_rate"):
             changed = True
-            self.config.setValue('sample_rate', 48000)
+            self.config.setValue("sample_rate", 48000)
 
         if not self.config.contains("channels"):
             changed = True
@@ -59,8 +64,8 @@ class Settings:
 
     @property
     def sarge_columns(self):
-        """ returns number of columns """
-        return self.config.value('columns', type=int)
+        """returns number of columns"""
+        return self.config.value("columns", type=int)
 
     @sarge_columns.setter
     def sarge_columns(self, columns):
@@ -70,8 +75,8 @@ class Settings:
 
     @property
     def music_directory(self):
-        """ Returns the directory of the voice """
-        directory = self.config.value('music_directory', type=str)
+        """Returns the directory of the voice"""
+        directory = self.config.value("music_directory", type=str)
         if directory.startswith("~"):
             return os.path.expanduser(directory)
         return directory
@@ -95,7 +100,7 @@ class Settings:
 
     @property
     def sarge_player_channel(self):
-        """ Returns details on the play of the songs"""
+        """Returns details on the play of the songs"""
         channels = self.config.value("channels", type=int)
         return channels
 
@@ -107,7 +112,7 @@ class Settings:
 
     @property
     def sarge_player_sample_rate(self):
-        """ Returns details on the play of the songs"""
+        """Returns details on the play of the songs"""
         sample_rate = self.config.value("sample_rate", type=int)
         return sample_rate
 

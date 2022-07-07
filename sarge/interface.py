@@ -30,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.settings = Settings()
         self.init_player()
-        ui_file = files(sarge.resources).joinpath('main_window.ui')
+        ui_file = files(sarge.resources).joinpath("main_window.ui")
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.init_ui()
@@ -57,11 +57,19 @@ class MainWindow(QtWidgets.QMainWindow):
         ui_interface = PreferenceDialog()
         settings = Settings()
         channel = {"Mono": 1, "Stereo": 2}
-        option = list(channel.keys())[list(channel.values()).index(settings.sarge_player_channel)]
-        combobox_index = ui_interface.channels_field.findText(option, Qt.MatchFixedString)
+        option = list(channel.keys())[
+            list(channel.values()).index(settings.sarge_player_channel)
+        ]
+        combobox_index = ui_interface.channels_field.findText(
+            option, Qt.MatchFixedString
+        )
         ui_interface.channels_field.setCurrentIndex(combobox_index)
-        ui_interface.cancel_button.clicked.connect(lambda: PreferenceDialog.close(ui_interface))
-        ui_interface.apply_button.clicked.connect(lambda: PreferenceDialog.close(ui_interface))
+        ui_interface.cancel_button.clicked.connect(
+            lambda: PreferenceDialog.close(ui_interface)
+        )
+        ui_interface.apply_button.clicked.connect(
+            lambda: PreferenceDialog.close(ui_interface)
+        )
         ui_interface.show()
 
     def init_instants(self):
@@ -82,14 +90,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def init_library(self):
         self.library_model = LibraryModel(self)
         self.library_view.setModel(self.library_model)
-        self.library_loader = LoadPlaylistThread(self.settings.music_directory, self.library_model)
+        self.library_loader = LoadPlaylistThread(
+            self.settings.music_directory, self.library_model
+        )
         self.library_loader.finished.connect(self.library_loaded)
-        self.statusBar().showMessage('Library loading...')
+        self.statusBar().showMessage("Library loading...")
         self.library_loader.start()
         self.library_view.doubleClicked.connect(self.append_item_to_playlist)
 
     def library_loaded(self):
-        self.statusBar().showMessage('Loaded library.')
+        self.statusBar().showMessage("Loaded library.")
 
     def closeEvent(self, event):
         if self.library_loader.isRunning():
@@ -109,12 +119,12 @@ class InstantItem(QtWidgets.QFrame):
     def __init__(self, item, parent=None):
         super().__init__(parent)
         self.item = item
-        ui_file = files(sarge.resources).joinpath('instant_widget.ui')
+        ui_file = files(sarge.resources).joinpath("instant_widget.ui")
         with as_file(ui_file) as ui:
             uic.loadUi(ui, self)
         self.name_label.setText(self.item.title_artist())
         self.duration_label.setText(self.item.length)
-        self.remainder_label.setText('')
+        self.remainder_label.setText("")
         self.show()
 
 
